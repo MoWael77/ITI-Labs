@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechVerse 2025 Conference Registeration</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <header>
+        <img src="techverse-logo.png" alt="TechVerse 2025 Logo" width="150">
+        <h1>Welcome to TechVerse 2025</h1>
+        <nav>
+           <ul>
+                <li><a href="#overview">Event Overview</a></li>
+                <li><a href="#speakers">Speakers</a></li>
+                <li><a href="#media">Media</a></li>
+                <li><a href="#register">Register</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#top">Back to Top</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+         <section id="overview">
+            <h2>Event Overview</h2>
+            <p>TechVerse 2025 is the premier annual technology conference bringing together innovators, thought leaders, and enthusiasts from around the globe.</p>
+            
+            <blockquote>
+                "TechVerse represents the convergence of technology and human potential. This year, we're pushing boundaries further than ever before."
+                <cite>- Jane Smith, Conference Organizer</cite>
+            </blockquote>
+            
+            <h3>Key Topics</h3>
+            <ol>
+                <li>Emerging Technologies
+                    <ul>
+                        <li>Quantum Computing</li>
+                        <li>AI Ethics</li>
+                        <li>Extended Reality</li>
+                    </ul>
+                </li>
+                <li>Sustainable Tech
+                    <ul>
+                        <li>Green Data Centers</li>
+                        <li>Energy-Efficient Algorithms</li>
+                    </ul>
+                </li>
+                <li>Future of Work</li>
+            </ol>
+        </section>
+
+        <section id="speakers">
+            <h2>Featured Speakers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Topic</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dr. Alan Turing</td>
+                        <td>Quantum Machine Learning</td>
+                        <td>9:00 AM</td>
+                    </tr>
+                    <tr>
+                        <td>Grace Hopper</td>
+                        <td>Next-Gen Programming Paradigms</td>
+                        <td>11:30 AM</td>
+                    </tr>
+                    <tr>
+                        <td>Tim Berners-Lee</td>
+                        <td>Web 5.0: The Semantic Future</td>
+                        <td>2:00 PM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="media">
+            <h2>Media Highlights</h2>
+            
+            <h3>Last Year's Conference</h3>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/example123" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            
+            <h3>Welcome Message</h3>
+            <audio controls>
+                <source src="welcome.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <figure>
+                <img src="conference-teaser.jpg" alt="Excited audience at last year's TechVerse conference" width="600">
+                <figcaption>TechVerse 2024 attendees experiencing a keynote presentation</figcaption>
+            </figure>
+        </section>
+
+        <section id="register">
+            <h2>Registration Form</h2>
+            <form action="/register" method="post">
+                <fieldset>
+                    <legend>Personal Information</legend>
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" required aria-label="Enter your full name" placeholder="John Doe">
+                    
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required aria-label="Enter your email address" placeholder="john@example.com">
+                    
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" id="dob" name="dob" required>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>Conference Details</legend>
+                    <label for="ticket-type">Ticket Type:</label>
+                    <select id="ticket-type" name="ticket-type" required>
+                        <option value="">Select an option</option>
+                        <option value="general">General Admission</option>
+                        <option value="vip">VIP Pass</option>
+                        <option value="student">Student</option>
+                    </select>
+                    
+                    <p>Interests:</p>
+                    <input type="checkbox" id="ai" name="interests" value="ai">
+                    <label for="ai">Artificial Intelligence</label><br>
+                    
+                    <input type="checkbox" id="web" name="interests" value="web">
+                    <label for="web">Web Development</label><br>
+                    
+                    <input type="checkbox" id="iot" name="interests" value="iot">
+                    <label for="iot">Internet of Things</label>
+                    
+                    <p>Preferred Session Format:</p>
+                    <input type="radio" id="workshop" name="format" value="workshop" required>
+                    <label for="workshop">Workshops</label><br>
+                    
+                    <input type="radio" id="lecture" name="format" value="lecture">
+                    <label for="lecture">Lectures</label><br>
+                    
+                    <input type="radio" id="panel" name="format" value="panel">
+                    <label for="panel">Panel Discussions</label>
+                </fieldset>
+                
+                <label for="comments">Special Requirements:</label>
+                <textarea id="comments" name="comments" rows="4" aria-label="Enter any special requirements or comments"></textarea>
+                
+                <button type="submit">Register Now</button>
+            </form>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <p>&copy; 2025 TechVerse Conference. All rights reserved.</p>
+        <address>
+            Contact us at: <a href="mailto:info@techverse2025.com">info@techverse2025.com</a><br>
+            123 Tech Avenue, Silicon Valley, CA 94025
+        </address>
+        <div class="social">
+            <a href="https://twitter.com/techverse" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <a href="https://linkedin.com/company/techverse" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://facebook.com/techverse" target="_blank" rel="noopener noreferrer">Facebook</a>
+        </div>
+    </footer>
+    </main>
+
+</body>
+</html>
