@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Promise Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="lab06.css">
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1>Promise Playground</h1>
+      <p>Experiment with JavaScript Promises</p>
+    </header>
+
+    <main class="app-content">
+      <div class="control-panel">
+        <div class="form-group">
+          <label for="taskSelect">Select Task:</label>
+          <select id="taskSelect" class="form-control">
+            <option value="">-- Choose a task --</option>
+            <option value="basics">1. Promise Basics</option>
+            <option value="chaining">2. Promise Chaining</option>
+            <option value="error">3. Error Handling</option>
+            <option value="custom">4. Custom Transformation</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="userInput">Input Value:</label>
+          <input type="text" id="userInput" class="form-control" placeholder="Enter input...">
+        </div>
+
+        <button id="runButton" class="btn-primary">Run Task</button>
+      </div>
+
+      <div class="output-panel">
+        <div class="output-header">
+          <h3>Execution Results</h3>
+          <div class="status-indicator" id="statusIndicator"></div>
+        </div>
+        <div id="output" class="output-content">Results will appear here...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="lab06.js"></script>
+</body>
+</html>
