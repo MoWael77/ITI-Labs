@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VueShop - Premium Shopping Experience</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Vue.js -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #6c757d;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, #2a3e9d 100%);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .navbar-dark {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--gradient) !important;
+        }
+        
+        .cart-count {
+            background-color: var(--danger);
+            border-radius: 50%;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+            transition: transform 0.3s;
+        }
+        
+        .btn-cart:hover .cart-count {
+            transform: scale(1.1);
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-image {
+            height: 220px;
+            object-fit: cover;
+            width: 100%;
+            transition: transform 0.5s;
+        }
+        
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 1.25rem;
+        }
+        
+        .stock-badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+        }
+        
+        .in-stock {
+            color: var(--success);
+        }
+        
+        .limited-stock {
+            color: var(--warning);
+        }
+        
+        .out-of-stock {
+            color: var(--danger);
+        }
+        
+        .discount-banner {
+            background: linear-gradient(45deg, var(--warning), var(--danger));
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 5px 15px rgba(246, 194, 62, 0.3); }
+            50% { box-shadow: 0 5px 20px rgba(246, 194, 62, 0.6); }
+            100% { box-shadow: 0 5px 15px rgba(246, 194, 62, 0.3); }
+        }
+        
+        .greyed-out {
+            color: #adb5bd !important;
+        }
+        
+        .btn-add-cart {
+            background: var(--gradient);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .btn-add-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+        }
+        
+        .btn-add-cart:disabled {
+            background: #d1d3e2;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+            z-index: 1040;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.4s ease;
+        }
+        
+        .cart-sidebar.open {
+            transform: translateX(0);
+        }
+        
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1039;
+            display: none;
+        }
+        
+        .cart-overlay.active {
+            display: block;
+        }
+        
+        .cart-item {
+            border-bottom: 1px solid #e3e6f0;
+            padding: 15px 0;
+        }
+        
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary);
+        }
+        
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secondary);
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 3px;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-box input {
+            border-radius: 20px;
+            padding-left: 45px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+        }
+        
+        .filter-buttons .btn {
+            border-radius: 20px;
+            margin: 0 5px;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        
+        @media (max-width: 768px) {
+            .cart-sidebar {
+                width: 100%;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-store me-2"></i>VueShop
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">About</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <div class="search-box me-3">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control" placeholder="Search products..." v-model="searchQuery">
+                        </div>
+                        <button class="btn btn-light btn-cart position-relative" @click="toggleCart">
+                            <i class="fas fa-shopping-cart"></i>
+                            Cart
+                            <span class="cart-count">{{ cartCount }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Toast Notification -->
+        <div class="toast-notification alert alert-success" :class="{ show: showToast }">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <span>{{ toastMessage }}</span>
+                <button type="button" class="btn-close ms-auto" @click="showToast = false"></button>
+            </div>
+        </div>
+
+        <!-- Cart Sidebar -->
+        <div class="cart-overlay" :class="{ active: showCart }" @click="showCart = false"></div>
+        <div class="cart-sidebar" :class="{ open: showCart }">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="m-0">
+                        <i class="fas fa-shopping-cart me-2"></i>Your Cart
+                    </h4>
+                    <button class="btn btn-sm btn-link text-dark" @click="showCart = false">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div v-if="cartCount === 0" class="empty-cart">
+                    <i class="fas fa-shopping-cart fa-4x mb-3" style="color: #d1d3e2;"></i>
+                    <h5>Your cart is empty</h5>
+                    <p class="text-muted">Start adding some products!</p>
+                    <button class="btn btn-primary mt-2" @click="showCart = false">Continue Shopping</button>
+                </div>
+                
+                <div v-else>
+                    <div v-for="item in cart" :key="item.product.id" class="cart-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img :src="item.product.image" :alt="item.product.name" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                <div class="ms-3">
+                                    <h6 class="mb-0">{{ item.product.name }}</h6>
+                                    <small class="text-muted">${{ item.product.price.toFixed(2) }}</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="btn-group me-2">
+                                    <button class="btn btn-sm btn-outline-secondary quantity-btn" 
+                                        @click="updateQuantity(item.product, item.quantity - 1)">-</button>
+                                    <span class="btn btn-sm disabled px-3">{{ item.quantity }}</span>
+                                    <button class="btn btn-sm btn-outline-secondary quantity-btn" 
+                                        @click="updateQuantity(item.product, item.quantity + 1)">+</button>
+                                </div>
+                                <span class="fw-bold me-2">${{ (item.product.price * item.quantity).toFixed(2) }}</span>
+                                <button class="btn btn-sm btn-link text-danger" 
+                                    @click="removeFromCart(item.product)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>${{ calculateSubtotal().toFixed(2) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" v-if="discount > 0">
+                            <span>Discount ({{ discount }}%):</span>
+                            <span class="text-success">-${{ calculateDiscount().toFixed(2) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping:</span>
+                            <span>{{ calculateShipping() === 0 ? 'Free' : '$' + calculateShipping().toFixed(2) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="m-0">Total:</h5>
+                        <h5 class="m-0">${{ calculateTotal().toFixed(2) }}</h5>
+                    </div>
+                    
+                    <button class="btn btn-success w-100 py-3" @click="checkout">
+                        <i class="fas fa-lock me-2"></i>Secure Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mt-4">
+            <!-- Discount Message -->
+            <div v-if="discount > 0" class="discount-banner">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="mb-1"><i class="fas fa-gift me-2"></i>Special Offer!</h5>
+                        <p class="mb-0">Get {{ discount }}% off on all products today! Limited time only.</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="h3 mb-0">{{ discount }}% OFF</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Header -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+                <h2 class="section-title">Our Products</h2>
+                
+                <div class="d-flex mt-3 mt-md-0">
+                    <div class="filter-buttons me-3">
+                        <button class="btn btn-outline-primary" :class="{ active: filter === 'all' }" @click="filter = 'all'">All</button>
+                        <button class="btn btn-outline-primary" :class="{ active: filter === 'inStock' }" @click="filter = 'inStock'">In Stock</button>
+                        <button class="btn btn-outline-primary" :class="{ active: filter === 'discounted' }" @click="filter = 'discounted'">Discounted</button>
+                    </div>
+                    <button class="btn btn-primary" @click="showProducts = !showProducts">
+                        {{ showProducts ? 'Hide Products' : 'Show Products' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div v-show="showProducts">
+                <div v-if="filteredProducts.length === 0" class="no-products">
+                    <i class="fas fa-search fa-4x mb-3" style="color: #d1d3e2;"></i>
+                    <h4>No products found</h4>
+                    <p class="text-muted">Try adjusting your search or filter criteria</p>
+                </div>
+                
+                <div v-else class="row">
+                    <div v-for="product in filteredProducts" :key="product.id" class="col-md-6 col-lg-4 mb-4">
+                        <div class="card product-card">
+                            <div class="position-relative">
+                                <img :src="product.image" :alt="product.name" class="product-image">
+                                <span v-if="product.isNew" class="position-absolute top-0 start-0 bg-success text-white m-2 px-2 py-1 rounded small">NEW</span>
+                                <span v-if="product.popular" class="position-absolute top-0 end-0 bg-warning text-dark m-2 px-2 py-1 rounded small">HOT</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title" :class="{ 'greyed-out': !product.inStock }">
+                                    {{ product.name }}
+                                </h5>
+                                <p class="card-text text-muted">{{ product.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="product-price">${{ product.price.toFixed(2) }}</span>
+                                    <span class="stock-badge" 
+                                        :class="{
+                                            'in-stock': product.inStock && product.price >= 50,
+                                            'limited-stock': product.inStock && product.price < 50,
+                                            'out-of-stock': !product.inStock
+                                        }">
+                                        <span v-if="product.inStock && product.price >= 50">In Stock</span>
+                                        <span v-else-if="product.inStock && product.price < 50">Limited Stock</span>
+                                        <span v-else>Out of Stock</span>
+                                    </span>
+                                </div>
+                                <button 
+                                    class="btn btn-add-cart w-100" 
+                                    :disabled="!product.inStock"
+                                    @click="addToCart(product)">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white mt-5 py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <h5 class="mb-3">VueShop</h5>
+                        <p>The best place to find the products you love at prices you'll adore.</p>
+                        <div class="d-flex">
+                            <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-pinterest"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mb-md-0">
+                        <h5 class="mb-3">Shop</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white text-decoration-none">All Products</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">New Arrivals</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Discounts</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Best Sellers</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 mb-4 mb-md-0">
+                        <h5 class="mb-3">Company</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#" class="text-white text-decoration-none">About Us</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Careers</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Contact</a></li>
+                            <li><a href="#" class="text-white text-decoration-none">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="mb-3">Newsletter</h5>
+                        <p>Subscribe to get special offers, free giveaways, and new product notifications.</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email address">
+                            <button class="btn btn-primary">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="mb-0">&copy; 2023 VueShop. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                products: [
+                    {
+                        id: 1,
+                        name: "Wireless Headphones",
+                        price: 89.99,
+                        inStock: true,
+                        description: "High-quality wireless headphones with noise cancellation.",
+                        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: true,
+                        popular: true
+                    },
+                    {
+                        id: 2,
+                        name: "Smartphone Pro",
+                        price: 699.99,
+                        inStock: true,
+                        description: "Latest smartphone with advanced camera and long battery life.",
+                        image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: false,
+                        popular: true
+                    },
+                    {
+                        id: 3,
+                        name: "Ultra Laptop",
+                        price: 1299.99,
+                        inStock: true,
+                        description: "Powerful laptop for work and entertainment.",
+                        image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: true,
+                        popular: false
+                    },
+                    {
+                        id: 4,
+                        name: "Smart Watch Series",
+                        price: 199.99,
+                        inStock: true,
+                        description: "Track your fitness and receive notifications on your wrist.",
+                        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: false,
+                        popular: true
+                    },
+                    {
+                        id: 5,
+                        name: "Bluetooth Speaker",
+                        price: 49.99,
+                        inStock: true,
+                        description: "Portable speaker with excellent sound quality.",
+                        image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: false,
+                        popular: false
+                    },
+                    {
+                        id: 6,
+                        name: "Gaming Console X",
+                        price: 499.99,
+                        inStock: false,
+                        description: "Next-gen gaming console for immersive gaming experience.",
+                        image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: true,
+                        popular: false
+                    },
+                    {
+                        id: 7,
+                        name: "Wireless Earbuds",
+                        price: 129.99,
+                        inStock: true,
+                        description: "True wireless earbuds with crystal clear sound.",
+                        image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+                        isNew: false,
+                        popular: true
+                    },
+                    
+                ],
+                cart: [],
+                showProducts: true,
+                discount: 10,
+                showCart: false,
+                searchQuery: '',
+                filter: 'all',
+                showToast: false,
+                toastMessage: ''
+            },
+            computed: {
+                cartCount() {
+                    return this.cart.reduce((total, item) => total + item.quantity, 0);
+                },
+                filteredProducts() {
+                    let filtered = this.products;
+                    
+                    // Apply search filter
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        filtered = filtered.filter(product => 
+                            product.name.toLowerCase().includes(query) || 
+                            product.description.toLowerCase().includes(query)
+                        );
+                    }
+                    
+                    // Apply stock/discount filter
+                    if (this.filter === 'inStock') {
+                        filtered = filtered.filter(product => product.inStock);
+                    } else if (this.filter === 'discounted') {
+                        filtered = filtered.filter(product => product.price < 100);
+                    }
+                    
+                    return filtered;
+                }
+            },
+            methods: {
+                addToCart(product) {
+                    if (!product.inStock) return;
+                    
+                    // Check if product is already in cart
+                    const existingItem = this.cart.find(item => item.product.id === product.id);
+                    
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        this.cart.push({
+                            product: product,
+                            quantity: 1
+                        });
+                    }
+                    
+                    // Show toast notification
+                    this.showNotification(`${product.name} added to cart!`);
+                },
+                removeFromCart(product) {
+                    this.cart = this.cart.filter(item => item.product.id !== product.id);
+                    this.showNotification(`${product.name} removed from cart!`);
+                },
+                updateQuantity(product, newQuantity) {
+                    if (newQuantity < 1) {
+                        this.removeFromCart(product);
+                        return;
+                    }
+                    
+                    const item = this.cart.find(item => item.product.id === product.id);
+                    if (item) {
+                        item.quantity = newQuantity;
+                    }
+                },
+                calculateSubtotal() {
+                    return this.cart.reduce((total, item) => {
+                        return total + (item.product.price * item.quantity);
+                    }, 0);
+                },
+                calculateDiscount() {
+                    return this.calculateSubtotal() * (this.discount / 100);
+                },
+                calculateShipping() {
+                    const subtotal = this.calculateSubtotal();
+                    return subtotal > 200 ? 0 : 15;
+                },
+                calculateTotal() {
+                    return this.calculateSubtotal() - this.calculateDiscount() + this.calculateShipping();
+                },
+                toggleCart() {
+                    this.showCart = !this.showCart;
+                    // Prevent body scrolling when cart is open
+                    document.body.style.overflow = this.showCart ? 'hidden' : '';
+                },
+                showNotification(message) {
+                    this.toastMessage = message;
+                    this.showToast = true;
+                    
+                    // Auto hide after 3 seconds
+                    setTimeout(() => {
+                        this.showToast = false;
+                    }, 3000);
+                },
+                checkout() {
+                    if (this.cartCount === 0) return;
+                    
+                    alert(`Thank you for your order! Your total is $${this.calculateTotal().toFixed(2)}.`);
+                    this.cart = [];
+                    this.showCart = false;
+                    this.showNotification('Order placed successfully!');
+                }
+            }
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
