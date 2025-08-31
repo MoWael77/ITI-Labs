@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VueShop - Your Online Store</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Vue Router -->
+    <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.js"></script>
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            margin-bottom: 30px;
+        }
+        .product-card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .cart-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .quantity-btn {
+            width: 38px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #0d6efd;
+            margin-bottom: 15px;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="module">
+        // Vue App Setup
+        const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
+        
+        // Components
+        const Home = {
+            template: `
+                <div>
+                    <div class="hero-section text-center">
+                        <div class="container">
+                            <h1 class="display-4 fw-bold">Welcome to VueShop</h1>
+                            <p class="lead">Your one-stop destination for all your shopping needs</p>
+                            <router-link to="/products" class="btn btn-primary btn-lg mt-3">Shop Now</router-link>
+                        </div>
+                    </div>
+                    
+                    <div class="container">
+                        <div class="row text-center mb-5">
+                            <div class="col-md-4">
+                                <div class="feature-icon">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <h3>Fast Delivery</h3>
+                                <p>Get your products delivered to your doorstep in no time.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h3>Secure Payment</h3>
+                                <p>Multiple secure payment options available for your convenience.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-icon">
+                                    <i class="fas fa-headset"></i>
+                                </div>
+                                <h3>24/7 Support</h3>
+                                <p>Our customer support team is always ready to help you.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 text-center mb-4">
+                                <h2>Featured Products</h2>
+                                <p class="text-muted">Check out our most popular items</p>
+                            </div>
+                            <div class="col-md-3 mb-4" v-for="product in featuredProducts" :key="product.id">
+                                <div class="card product-card">
+                                    <img :src="product.image" class="card-img-top p-3" :alt="product.title" style="height: 200px; object-fit: contain;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ product.title.slice(0, 20) }}...</h5>
+                                        <p class="card-text fw-bold text-primary">$ {{ product.price }}</p>
+                                        <button @click="addToCart(product)" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const featuredProducts = ref([]);
+                
+                onMounted(async () => {
+                    try {
+                        const response = await fetch('https://fakestoreapi.com/products?limit=4');
+                        featuredProducts.value = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching featured products:', error);
+                        // Fallback data if API fails
+                        featuredProducts.value = [
+                            {
+                                id: 1,
+                                title: "Fjallraven Backpack",
+                                price: 109.95,
+                                image: "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg"
+                            },
+                            {
+                                id: 2,
+                                title: "Mens Casual T-Shirt",
+                                price: 22.3,
+                                image: "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg"
+                            },
+                            {
+                                id: 3,
+                                title: "Solid Gold Petite",
+                                price: 168,
+                                image: "https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_.jpg"
+                            },
+                            {
+                                id: 4,
+                                title: "WD 2TB Elements Portable",
+                                price: 64,
+                                image: "https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg"
+                            }
+                        ];
+                    }
+                });
+                
+                const addToCart = (product) => {
+                    // This would be better with a centralized state management
+                    alert(`${product.title.slice(0, 20)}... added to cart!`);
+                };
+                
+                return {
+                    featuredProducts,
+                    addToCart
+                };
+            }
+        };
+        
+        const Products = {
+            template: `
+                <div class="container">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="mb-4">Our Products</h2>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control form-control-lg" placeholder="Search products..." v-model="searchQuery">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-4" v-for="product in filteredProducts" :key="product.id">
+                            <div class="card product-card h-100">
+                                <img :src="product.image" class="card-img-top p-3" :alt="product.title" style="height: 200px; object-fit: contain;">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ product.title.slice(0, 35) }}...</h5>
+                                    <p class="card-text fw-bold text-primary">$ {{ product.price }}</p>
+                                    <p class="card-text flex-grow-1"><small class="text-muted">{{ product.category }}</small></p>
+                                    <button @click="addToCart(product)" class="btn btn-primary mt-auto">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4" v-if="filteredProducts.length === 0">
+                        <div class="col-12 text-center">
+                            <p class="lead">No products found matching your search.</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const products = ref([]);
+                const searchQuery = ref('');
+                
+                onMounted(async () => {
+                    try {
+                        const response = await fetch('https://fakestoreapi.com/products');
+                        products.value = await response.json();
+                    } catch (error) {
+                        console.error('Error fetching products:', error);
+                        // Fallback data if API fails
+                        products.value = [
+                            {
+                                id: 1,
+                                title: "Fjallraven - Foldsack No. 1 Backpack",
+                                price: 109.95,
+                                category: "men's clothing",
+                                image: "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg"
+                            },
+                            {
+                                id: 2,
+                                title: "Mens Casual Premium Slim Fit T-Shirts",
+                                price: 22.3,
+                                category: "men's clothing",
+                                image: "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg"
+                            },
+                            {
+                                id: 3,
+                                title: "White Gold Plated Princess",
+                                price: 9.99,
+                                category: "jewelery",
+                                image: "https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_.jpg"
+                            },
+                            {
+                                id: 4,
+                                title: "WD 2TB Elements Portable External Hard Drive",
+                                price: 64,
+                                category: "electronics",
+                                image: "https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg"
+                            },
+                            {
+                                id: 5,
+                                title: "SanDisk SSD PLUS 1TB Internal SSD",
+                                price: 109,
+                                category: "electronics",
+                                image: "https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg"
+                            },
+                            {
+                                id: 6,
+                                title: "Silicon Power 256GB SSD 3D NAND A55",
+                                price: 109,
+                                category: "electronics",
+                                image: "https://fakestoreapi.com/img/71kWymZ+c+L._AC_SX679_.jpg"
+                            },
+                            {
+                                id: 7,
+                                title: "WD 4TB Gaming Drive Works with Playstation 4",
+                                price: 114,
+                                category: "electronics",
+                                image: "https://fakestoreapi.com/img/61mtL65D4cL._AC_SX679_.jpg"
+                            }
+                        ];
+                    }
+                });
+                
+                const filteredProducts = computed(() => {
+                    if (!searchQuery.value) {
+                        return products.value;
+                    }
+                    const query = searchQuery.value.toLowerCase();
+                    return products.value.filter(product => 
+                        product.title.toLowerCase().includes(query) || 
+                        product.category.toLowerCase().includes(query)
+                    );
+                });
+                
+                const addToCart = (product) => {
+                    // This would be better with a centralized state management
+                    alert(`${product.title.slice(0, 20)}... added to cart!`);
+                };
+                
+                return {
+                    products,
+                    searchQuery,
+                    filteredProducts,
+                    addToCart
+                };
+            }
+        };
+        
+        const About = {
+            template: `
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 text-center mb-5">
+                            <h2>About VueShop</h2>
+                            <p class="lead">Learn more about our story and mission</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <h3>Our Story</h3>
+                            <p>Founded in 2023, VueShop started as a small project with a big vision: to create an exceptional online shopping experience using modern technology.</p>
+                            <p>Our team of passionate developers and designers work tirelessly to bring you the best products at the most competitive prices.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded" alt="Our Story">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-5">
+                        <div class="col-md-6 order-md-2">
+                            <h3>Our Mission</h3>
+                            <p>At VueShop, we believe that shopping online should be enjoyable, easy, and secure. We leverage the power of Vue.js to create a fast, responsive, and intuitive shopping experience.</p>
+                            <p>We're committed to continuous improvement and innovation in the e-commerce space.</p>
+                        </div>
+                        <div class="col-md-6 order-md-1">
+                            <img src="https://images.unsplash.com/photo-1563014959-7aaa83350992?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="img-fluid rounded" alt="Our Mission">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <h3 class="mb-4">Meet Our Team</h3>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle mb-3" alt="Team Member" width="120">
+                            <h5>John Smith</h5>
+                            <p class="text-muted">Founder & CEO</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/women/44.jpg" class="rounded-circle mb-3" alt="Team Member" width="120">
+                            <h5>Sarah Johnson</h5>
+                            <p class="text-muted">Lead Developer</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <img src="https://randomuser.me/api/portraits/men/62.jpg" class="rounded-circle mb-3" alt="Team Member" width="120">
+                            <h5>Michael Brown</h5>
+                            <p class="text-muted">Product Designer</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+        
+        const Cart = {
+            template: `
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2 class="mb-4">Your Shopping Cart</h2>
+                            
+                            <div v-if="cartItems.length === 0" class="text-center py-5">
+                                <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+                                <p class="lead">Your cart is empty</p>
+                                <router-link to="/products" class="btn btn-primary">Start Shopping</router-link>
+                            </div>
+                            
+                            <div v-else>
+                                <div class="cart-item row" v-for="(item, index) in cartItems" :key="index">
+                                    <div class="col-md-2">
+                                        <img :src="item.image" class="img-fluid rounded" :alt="item.title">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h5>{{ item.title.slice(0, 30) }}...</h5>
+                                        <p class="text-muted">{{ item.price }} each</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center">
+                                            <button @click="updateQuantity(item, item.quantity - 1)" class="btn btn-outline-secondary quantity-btn">-</button>
+                                            <span class="mx-3 fs-5">{{ item.quantity }}</span>
+                                            <button @click="updateQuantity(item, item.quantity + 1)" class="btn btn-outline-secondary quantity-btn">+</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <p class="fw-bold">{{ (item.price * item.quantity).toFixed(2) }}</p>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button @click="removeFromCart(item)" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-5">
+                                    <div class="col-md-6 offset-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Order Summary</h5>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Subtotal:</span>
+                                                    <span>{{ cartTotal.toFixed(2) }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Shipping:</span>
+                                                    <span>{{ (cartTotal > 0 ? 5.99 : 0).toFixed(2) }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Tax:</span>
+                                                    <span>$ {{ (cartTotal * 0.08).toFixed(2) }}</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between mb-3">
+                                                    <strong>Total:</strong>
+                                                    <strong>$ {{ (cartTotal > 0 ? cartTotal + 5.99 + (cartTotal * 0.08) : 0).toFixed(2) }}</strong>
+                                                </div>
+                                                <button class="btn btn-primary w-100">Proceed to Checkout</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                // For demo purposes, using sample cart data
+                const cartItems = ref([
+                    {
+                        id: 1,
+                        title: "Fjallraven - Foldsack No. 1 Backpack",
+                        price: 109.95,
+                        image: "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg",
+                        quantity: 1
+                    },
+                    {
+                        id: 2,
+                        title: "Mens Casual Premium Slim Fit T-Shirts",
+                        price: 22.3,
+                        image: "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg",
+                        quantity: 2
+                    }
+                ]);
+                
+                const cartTotal = computed(() => {
+                    return cartItems.value.reduce((total, item) => {
+                        return total + (item.price * item.quantity);
+                    }, 0);
+                });
+                
+                const updateQuantity = (item, newQuantity) => {
+                    if (newQuantity < 1) {
+                        removeFromCart(item);
+                        return;
+                    }
+                    item.quantity = newQuantity;
+                };
+                
+                const removeFromCart = (item) => {
+                    cartItems.value = cartItems.value.filter(cartItem => cartItem.id !== item.id);
+                };
+                
+                return {
+                    cartItems,
+                    cartTotal,
+                    updateQuantity,
+                    removeFromCart
+                };
+            }
+        };
+        
+        const Contact = {
+            template: `
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-4">Contact Us</h2>
+                            <p class="lead mb-4">Have questions? We'd love to hear from you!</p>
+                            
+                            <form @submit.prevent="submitForm" class="needs-validation" :class="{'was-validated': formSubmitted}" novalidate>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="name" v-model="form.name" required>
+                                    <div class="error-message" v-if="formSubmitted && !form.name">Please provide your name.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" v-model="form.email" required>
+                                    <div class="error-message" v-if="formSubmitted && !form.email">Please provide a valid email address.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message" rows="5" v-model="form.message" required></textarea>
+                                    <div class="error-message" v-if="formSubmitted && !form.message">Please enter your message.</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">Send Message</button>
+                                
+                                <div v-if="submitSuccess" class="alert alert-success mt-4">
+                                    <i class="fas fa-check-circle"></i> Thank you for contacting us! We'll get back to you soon.
+                                </div>
+                            </form>
+                            
+                            <div class="row mt-5">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                                        <h5>Address</h5>
+                                        <p class="text-muted">123 Vue Street, JS City</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                                        <h5>Phone</h5>
+                                        <p class="text-muted">+1 (555) 123-4567</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                        <h5>Email</h5>
+                                        <p class="text-muted">info@vueshop.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            setup() {
+                const form = reactive({
+                    name: '',
+                    email: '',
+                    message: ''
+                });
+                
+                const formSubmitted = ref(false);
+                const submitSuccess = ref(false);
+                
+                const submitForm = () => {
+                    formSubmitted.value = true;
+                    
+                    if (!form.name || !form.email || !form.message) {
+                        return;
+                    }
+                    
+                    // In a real application, you would send the form data to a server here
+                    console.log('Form submitted:', form);
+                    
+                    // Show success message
+                    submitSuccess.value = true;
+                    
+                    // Reset form after successful submission
+                    form.name = '';
+                    form.email = '';
+                    form.message = '';
+                    formSubmitted.value = false;
+                    
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        submitSuccess.value = false;
+                    }, 5000);
+                };
+                
+                return {
+                    form,
+                    formSubmitted,
+                    submitSuccess,
+                    submitForm
+                };
+            }
+        };
+        
+        // Navigation Component
+        const Navbar = {
+            template: `
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+                    <div class="container">
+                        <router-link to="/" class="navbar-brand">
+                            <i class="fas fa-store me-2"></i>VueShop
+                        </router-link>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav me-auto">
+                                <li class="nav-item">
+                                    <router-link to="/" class="nav-link">Home</router-link>
+                                </li>
+                                <li class="nav-item">
+                                    <router-link to="/products" class="nav-link">Products</router-link>
+                                </li>
+                                <li class="nav-item">
+                                    <router-link to="/about" class="nav-link">About</router-link>
+                                </li>
+                                <li class="nav-item">
+                                    <router-link to="/contact" class="nav-link">Contact</router-link>
+                                </li>
+                            </ul>
+                            <div class="d-flex">
+                                <router-link to="/cart" class="btn btn-outline-light position-relative">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        2
+                                    </span>
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            `
+        };
+        
+        // Footer Component
+        const Footer = {
+            template: `
+                <footer class="mt-5">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <h5>VueShop</h5>
+                                <p class="text-muted">Your one-stop destination for all your shopping needs.</p>
+                                <div class="d-flex">
+                                    <a href="#" class="me-3 text-dark"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#" class="me-3 text-dark"><i class="fab fa-twitter"></i></a>
+                                    <a href="#" class="me-3 text-dark"><i class="fab fa-instagram"></i></a>
+                                    <a href="#" class="text-dark"><i class="fab fa-linkedin-in"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-4">
+                                <h5>Shop</h5>
+                                <ul class="list-unstyled">
+                                    <li><a href="#" class="text-muted text-decoration-none">All Products</a></li>
+                                    <li><a href="#" class="text-muted text-decoration-none">New Arrivals</a></li>
+                                    <li><a href="#" class="text-muted text-decoration-none">Discounts</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-2 mb-4">
+                                <h5>Company</h5>
+                                <ul class="list-unstyled">
+                                    <li><a href="#" class="text-muted text-decoration-none">About Us</a></li>
+                                    <li><a href="#" class="text-muted text-decoration-none">Careers</a></li>
+                                    <li><a href="#" class="text-muted text-decoration-none">Contact</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <h5>Newsletter</h5>
+                                <p class="text-muted">Subscribe to get special offers and once-in-a-lifetime deals.</p>
+                                <div class="input-group">
+                                    <input type="email" class="form-control" placeholder="Your email">
+                                    <button class="btn btn-primary">Subscribe</button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <p class="text-muted">&copy; 2023 VueShop. All rights reserved.</p>
+                            </div>
+                            <div class="col-md-6 mb-3 text-md-end">
+                                <a href="#" class="text-muted text-decoration-none me-3">Privacy Policy</a>
+                                <a href="#" class="text-muted text-decoration-none me-3">Terms of Service</a>
+                                <a href="#" class="text-muted text-decoration-none">Cookie Policy</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            `
+        };
+        
+        // Router setup
+        const routes = [
+            { path: '/', component: Home },
+            { path: '/products', component: Products },
+            { path: '/about', component: About },
+            { path: '/cart', component: Cart },
+            { path: '/contact', component: Contact }
+        ];
+        
+        const router = VueRouter.createRouter({
+            history: VueRouter.createWebHashHistory(),
+            routes
+        });
+        
+        // Create and mount the app
+        const app = Vue.createApp({
+            template: `
+                <div>
+                    <Navbar />
+                    <main class="min-vh-100">
+                        <router-view></router-view>
+                    </main>
+                    <Footer />
+                </div>
+            `,
+            components: {
+                Navbar,
+                Footer
+            }
+        });
+        
+        app.use(router);
+        app.mount('#app');
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
